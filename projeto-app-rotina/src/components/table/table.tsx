@@ -1,58 +1,51 @@
 import './table.css';
 
+const hours = [
+  "07:00","07:30","08:00","08:30","09:00","09:30",
+  "10:00","10:30","11:00","11:30","12:00","12:30",
+  "13:00","13:30","14:00","14:30","15:00","15:30",
+  "16:00","16:30","17:00","17:30","18:00","18:30",
+  "19:00","19:30","20:00","20:30","21:00","21:30",
+  "22:00","22:30","23:00"
+];
+
+const days = [
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+  "Domingo"
+];
+
 export default function Table() {
-    return(
-        <div className="table-container">
-            <div className="table-content">
-                <div className="list-hours">
-                    <ul className="list-hours-item">
-                        <li>07:00</li>
-                        <li>07:30</li>
-                        <li>08:00</li>
-                        <li>08:30</li>
-                        <li>09:00</li>
-                        <li>09:30</li>
-                        <li>10:00</li>
-                        <li>10:30</li>
-                        <li>11:00</li>
-                        <li>11:30</li>
-                        <li>12:00</li>
-                        <li>12:30</li>
-                        <li>13:00</li>
-                        <li>13:30</li>
-                        <li>14:00</li>
-                        <li>14:30</li>
-                        <li>15:00</li>
-                        <li>15:30</li>
-                        <li>16:00</li>
-                        <li>16:30</li>
-                        <li>17:00</li>
-                        <li>17:30</li>
-                        <li>18:00</li>
-                        <li>18:30</li>
-                        <li>19:00</li>
-                        <li>19:30</li>
-                        <li>20:00</li>
-                        <li>20:30</li>
-                        <li>21:00</li>
-                        <li>21:30</li>
-                        <li>22:00</li>
-                        <li>22:30</li>
-                        <li>23:00</li>
-                    </ul>
-                </div>
-                <div className="list-days">
-                    <ul className="list-days-item">
-                        <li>Segunda-feira</li>
-                        <li>Terça-feira</li>
-                        <li>Quarta-feira</li>
-                        <li>Quinta-feira</li>
-                        <li>Sexta-feira</li>
-                        <li>Sábado</li>
-                        <li>Domingo</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    )
+  return (
+    <div className="table-container">
+      <table className="schedule-table">
+        <thead>
+          <tr>
+            <th className="table-header-title">Horário</th>
+            {days.map(day => (
+              <th key={day} className="table-header-day">{day}</th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {hours.map(hour => (
+            <tr key={hour} className="table-row">
+              <td className="hour-cell">{hour}</td>
+
+              {days.map(day => (
+                <td key={day} className="day-cell">
+                  {/* aqui entra conteúdo depois */}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

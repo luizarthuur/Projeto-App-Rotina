@@ -9,6 +9,7 @@
     top: 0;
     border-bottom: 1px solid #ff8800;
     background-color: rgb(13, 4, 95);
+    z-index: 9;
 }
 
 .header-content-1{
@@ -53,3 +54,4 @@
 .header-title-app{
     color: #ff8800;
 }
+
