@@ -1,47 +1,62 @@
-import { createPortal } from 'react-dom';
-import './dayModal.css';
-import { useState } from 'react';
-import type { Task } from '../table/table';
+import { createPortal } from 'react-dom'
+import { useEffect, useState } from 'react'
+import './dayModal.css'
+import type { Task } from '../table/table'
 
 interface DayModalProps {
-  onClose: () => void;
-  day: string;
-  onAddTask: (task: Task) => void;
+  onClose: () => void
+  onSaveTask: (task: Task) => void
+  day: string
+  hour: string
+  task?: Task | null
 }
 
-interface DayModalInfo{
-  taskName: string;
-  taskDescription: string;
-  taskInitialTime: string;
-  taskFinalTime: string;
-}
-
-export default function DayModal({ onClose, day, onAddTask }: DayModalProps) {
-  const [dayModalInfo, setDayModalInfo] = useState<DayModalInfo>({
+export default function DayModal({
+  onClose,
+  onSaveTask,
+  day,
+  task
+}: DayModalProps) {
+  const [form, setForm] = useState({
     taskName: '',
     taskDescription: '',
     taskInitialTime: '',
-    taskFinalTime: '',
-  });
+    taskFinalTime: ''
+  })
 
-  function handleAddTask() {
-    onAddTask({
+  useEffect(() => {
+    if (task) {
+      setForm({
+        taskName: task.taskName,
+        taskDescription: task.taskDescription,
+        taskInitialTime: task.taskInitialTime,
+        taskFinalTime: task.taskFinalTime
+      })
+    } else {
+      setForm({
+        taskName: '',
+        taskDescription: '',
+        taskInitialTime: '',
+        taskFinalTime: ''
+      })
+    }
+  }, [task])
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  function handleSave() {
+    onSaveTask({
+      id: task?.id ?? crypto.randomUUID(),
       day,
-      hour: dayModalInfo.taskInitialTime,
-      taskName: dayModalInfo.taskName,
-      taskDescription: dayModalInfo.taskDescription,
-      taskInitialTime: dayModalInfo.taskInitialTime,
-      taskFinalTime: dayModalInfo.taskFinalTime,
-    });
-  
-    setDayModalInfo({
-      taskName: '',
-      taskDescription: '',
-      taskInitialTime: '',
-      taskFinalTime: '',
-    });
-  
-    onClose();
+      ...form
+    })
   }
 
   return createPortal(
@@ -50,33 +65,81 @@ export default function DayModal({ onClose, day, onAddTask }: DayModalProps) {
 
       <div className="modal-container">
         <div className="modal-content">
-          <h1 className='modal-content-title'>{day}</h1>
+          <h1 className="modal-content-title">{day}</h1>
 
-          {dayModalInfo.taskName && dayModalInfo.taskInitialTime && dayModalInfo.taskFinalTime && (
-          <div className='modal-content-info-container'>
-          <div className='modal-content-info-item'>
-            <h1 className='modal-content-info-item-title'>Nome da tarefa</h1>
-            <p className='modal-content-info-item-name'>{dayModalInfo.taskName}</p>
-            <h1 className='modal-content-info-item-title'>Descrição da tarefa</h1>
-            <p className='modal-content-info-item-description'>{dayModalInfo.taskDescription}</p>
-            <h1 className='modal-content-info-item-title'>Horas de duração:</h1>
-            <p className='modal-content-info-item-duration'>{new Date(dayModalInfo.taskFinalTime).getTime() - new Date(dayModalInfo.taskInitialTime).getTime() / 1000 / 60 / 60} horas</p>
-          </div>
-          </div>
+          {task && (
+            <div className="modal-content-task-preview">
+
+              <div className='modal-content-task-preview-container'>
+                <h1 className='modal-content-task-preview-title'>Título da tarefa:</h1>
+                <p className='modal-content-task-preview-name'>{task.taskName}</p>
+              </div>
+
+              <div className='modal-content-task-preview-container'>
+                <h1 className='modal-content-task-preview-title'>Descrição:</h1>
+                <p className='modal-content-task-preview-description'>{task.taskDescription}</p>
+              </div>
+
+              <div className='modal-content-task-preview-container'>
+                <h1 className='modal-content-task-preview-title'>Horário:</h1>
+                <p className='modal-content-task-preview-time'>{task.taskInitialTime} - {task.taskFinalTime}</p>
+              </div>
+
+            </div>
           )}
 
-          <div className='modal-content-info'>
-            <input type="text" placeholder='Nome da tarefa' value={dayModalInfo.taskName} onChange={(e) => setDayModalInfo({ ...dayModalInfo, taskName: e.target.value })} />
-            <input type="text" placeholder='Descrição da tarefa' value={dayModalInfo.taskDescription} onChange={(e) => setDayModalInfo({ ...dayModalInfo, taskDescription: e.target.value })} />
-            <input type="time" placeholder='Hora inicial' value={dayModalInfo.taskInitialTime} onChange={(e) => setDayModalInfo({ ...dayModalInfo, taskInitialTime: e.target.value })} />
-            <input type="time" placeholder='Hora final' value={dayModalInfo.taskFinalTime} onChange={(e) => setDayModalInfo({ ...dayModalInfo, taskFinalTime: e.target.value })} />
-            <button onClick={handleAddTask}>Adicionar tarefa</button>
+          <div className="modal-content-info">
+            <input
+              type="text"
+              name="taskName"
+              placeholder="Nome da tarefa"
+              value={form.taskName}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="taskDescription"
+              placeholder="Descrição da tarefa"
+              value={form.taskDescription}
+              onChange={handleChange}
+            />
+
+            <input
+              type="time"
+              name="taskInitialTime"
+              placeholder="Hora inicial"
+              value={form.taskInitialTime}
+              onChange={handleChange}
+            />
+
+            <input
+              type="time"
+              name="taskFinalTime"
+              placeholder="Hora final"
+              value={form.taskFinalTime}
+              onChange={handleChange}
+            />
+
+            <div className='modal-content-button-container'>
+
+            <button className='modal-content-button-save' onClick={handleSave}>
+              {task ? 'Salvar tarefa' : 'Adicionar tarefa'}
+            </button>
+
+            <button
+            onClick={onClose}
+            className="modal-content-button-close"
+          >
+            Fechar
+          </button>
+
           </div>
 
-          <button onClick={onClose} className='modal-content-button'>Fechar</button>
+          </div>
         </div>
       </div>
     </>,
     document.body
-  );
+  )
 }

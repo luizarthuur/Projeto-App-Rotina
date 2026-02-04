@@ -12,47 +12,75 @@
     align-items: center;
     justify-content: center;
     z-index: 1001;
+    top: 180px;
   }
   
   .modal-content {
     background: #fff;
     padding: 24px;
     border-radius: 8px;
-    min-width: 300px;
+    min-width: 720px;
+
   }
 
   .modal-content-title{
     font-size: 24px;
     font-weight: bold;
     color: #000;
+    margin-bottom: 30px;
   }
 
-  .modal-content-button{
+  .modal-content-button-close{
     font-size: 16px;
     font-weight: bold;
     color: #fff;
+    width: 100%;
   }
 
-.modal-content-info-item-title{
-  color: black;
-  font-size: 18px;
-  font-weight: bold;
-}
+  .modal-content-button-container{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin: 24px 0;
+  }
 
-.modal-content-info-item-name{
-  color: black;
+  .modal-content-button-save{
+    background-color: #375AC5;
+    width: 100%;
+  }
+
+  .modal-content-info{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+.modal-content-task-preview-title{
+  color: #375AC5;
   font-size: 16px;
   font-weight: bold;
 }
 
-.modal-content-info-item-description{
+.modal-content-task-preview-name{
   color: black;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: normal;
 }
 
-.modal-content-info-item-duration{
+.modal-content-task-preview-description{
   color: black;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: normal;
 }
+
+.modal-content-task-preview-time{
+  color: black;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.modal-content-task-preview-container{
+  margin: 35px 0;
+}
+

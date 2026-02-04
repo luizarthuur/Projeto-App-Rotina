@@ -22,19 +22,15 @@ const days = [
 ]
 
 export interface Task {
+  id: string
   day: string
   taskName: string
   taskDescription: string
   taskInitialTime: string
   taskFinalTime: string
-  hour: string
 }
 
-function isHourInRange(
-  hour: string,
-  start: string,
-  end: string
-) {
+function isHourInRange(hour: string, start: string, end: string) {
   return hour >= start && hour < end
 }
 
@@ -42,11 +38,13 @@ export default function Table() {
   const [isDayModalOpen, setIsDayModalOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedHour, setSelectedHour] = useState<string | null>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
 
-  function openDayModal(day: string, hour: string) {
+  function openDayModal(day: string, hour: string, task?: Task) {
     setSelectedDay(day)
     setSelectedHour(hour)
+    setSelectedTask(task ?? null)
     setIsDayModalOpen(true)
   }
 
@@ -54,10 +52,17 @@ export default function Table() {
     setIsDayModalOpen(false)
     setSelectedDay(null)
     setSelectedHour(null)
+    setSelectedTask(null)
   }
 
-  function handleAddTask(task: Task) {
-    setTasks(prev => [...prev, task])
+  function handleSaveTask(task: Task) {
+    setTasks(prev => {
+      const exists = prev.some(t => t.id === task.id)
+      return exists
+        ? prev.map(t => (t.id === task.id ? task : t))
+        : [...prev, task]
+    })
+
     closeDayModal()
   }
 
@@ -67,8 +72,9 @@ export default function Table() {
         <DayModal
           day={selectedDay}
           hour={selectedHour}
+          task={selectedTask}
           onClose={closeDayModal}
-          onAddTask={handleAddTask}
+          onSaveTask={handleSaveTask}
         />
       )}
 
@@ -91,12 +97,12 @@ export default function Table() {
                 <td className="hour-cell">{hour}</td>
 
                 {days.map(day => {
-                  const task = tasks.find(task =>
-                    task.day === day &&
+                  const task = tasks.find(t =>
+                    t.day === day &&
                     isHourInRange(
                       hour,
-                      task.taskInitialTime,
-                      task.taskFinalTime
+                      t.taskInitialTime,
+                      t.taskFinalTime
                     )
                   )
 
@@ -104,11 +110,13 @@ export default function Table() {
                     <td
                       key={`${day}-${hour}`}
                       className={`day-cell ${task ? 'occupied' : ''}`}
-                      onClick={() => openDayModal(day, hour)}
+                      onClick={() =>
+                        openDayModal(day, hour, task)
+                      }
                     >
                       {task && (
                         <div className="task">
-                          <strong className='task-name'>{task.taskName}</strong>
+                          <strong>{task.taskName}</strong>
                         </div>
                       )}
                     </td>
