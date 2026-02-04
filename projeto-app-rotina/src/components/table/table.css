@@ -59,7 +59,7 @@
     text-align: center;
     padding: 20px;
     border-right: 1px solid #ffffff;
-    width: 140px;
+    min-width: 125px;
     height: 75px;
     border-top: 1px solid #ffffff;
 }
@@ -88,4 +88,12 @@
 
 .hour-cell{
     border-left: 1px solid #ffffff;
+    text-align: center;
+    height: 60px;
+}
+
+.day-cell:hover{
+    background-color: #000000;
+    color: #ffffff;
+    cursor: pointer;
 }
