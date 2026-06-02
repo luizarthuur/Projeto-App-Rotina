@@ -84,6 +84,7 @@
     width: 140px;
     height: 75px;
     border-top: 1px solid #ffffff;
+    color: #000000;
 }
 
 .hour-cell{
@@ -97,3 +98,177 @@
     color: #ffffff;
     cursor: pointer;
 }
+
+.day-cell.occupied{
+    text-align: center;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+/* table.css */
+
+/* Navegação entre semanas */
+.week-navigation {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border-radius: 48px;
+    width: fit-content;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin: 1.5rem auto 1.5rem 42rem;
+    justify-content: center;
+  }
+  
+  .week-navigation button {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 32px;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #000000;
+  }
+  
+  .week-navigation button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+  
+  .week-range {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+  
+  /* Container da tabela com scroll horizontal */
+  .table-container {
+    overflow-x: auto;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: white;
+  }
+  
+  /* Tabela principal */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    min-width: 800px;
+  }
+  
+  /* Cabeçalho */
+  .table-header-title,
+  .table-header-day {
+    background-color: #e2e0e0;
+    padding: 12px 8px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    color: #000000;
+  }
+  
+  .table-header-title {
+    background-color: #f1f3f5;
+    width: 80px;
+  }
+  
+  .table-header-day {
+    min-width: 110px;
+  }
+  
+  .day-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .day-number {
+    font-size: 0.7rem;
+    font-weight: normal;
+    color: #6c757d;
+  }
+  
+  /* Destaque do dia atual (hoje) */
+  .today-header {
+    background-color: #e3f2fd !important;
+    border-bottom: 3px solid #1976d2;
+  }
+  
+  .today-header .day-number {
+    font-weight: bold;
+    color: #1976d2;
+  }
+  
+  /* Células de hora */
+  .hour-cell {
+    background-color: #e2e0e0;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    padding: 10px 6px;
+    color: #2c3e50;
+  }
+  
+  /* Células dos dias */
+  .day-cell {
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    vertical-align: top;
+    height: 70px;
+    cursor: pointer;
+    transition: background 0.15s;
+    background-color: white;
+  }
+  
+  .day-cell:hover {
+    background-color: #f1f9ff;
+  }
+  
+  .day-cell.occupied {
+    background-color: #f0fdf4;
+  }
+  
+  /* Bloco da tarefa dentro da célula */
+  .task {
+    background-color: #4caf50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: transform 0.1s;
+  }
+  
+  .task:hover {
+    transform: scale(1.02);
+    background-color: #43a047;
+  }
+  
+  .task-description {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.9;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .schedule-table {
+      font-size: 0.75rem;
+    }
+    .table-header-day {
+      min-width: 80px;
+    }
+    .task {
+      font-size: 0.7rem;
+    }
+  }
