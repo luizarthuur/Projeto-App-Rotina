@@ -117,7 +117,7 @@
     border-radius: 48px;
     width: fit-content;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    margin: 1.5rem auto 1.5rem 42rem;
+    margin: 1.5rem auto 1.5rem 36rem;
     justify-content: center;
   }
   
@@ -271,4 +271,24 @@
     .task {
       font-size: 0.7rem;
     }
+  }
+
+  .load-template-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+  }
+  .load-template-btn:hover {
+    background-color: #45a049;
+  }
+  
+  .template-title {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.8rem;
+  }
+  .template-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 1rem;
   }

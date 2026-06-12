@@ -1,29 +1,18 @@
-// Table.tsx (versão com persistência garantida)
+// Table.tsx
 import './table.css';
-import { useState, useEffect } from 'react';
-import {
-  addDays,
-  subDays,
-  startOfWeek,
-  format,
-  isSameDay,
-} from 'date-fns';
+import { useState, useEffect, useRef } from 'react';
+import { addDays, subDays, startOfWeek, format, isSameDay } from 'date-fns';
 import DayModal from '../dayModal/dayModal';
 
 const hours = [
-  '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00',
-  '19:00', '20:00', '21:00', '22:00', '23:00',
+  '07:00','08:00','09:00','10:00','11:00','12:00',
+  '13:00','14:00','15:00','16:00','17:00','18:00',
+  '19:00','20:00','21:00','22:00','23:00'
 ];
 
-const dayNames = [
-  'Segunda-feira',
-  'Terça-feira',
-  'Quarta-feira',
-  'Quinta-feira',
-  'Sexta-feira',
-  'Sábado',
-  'Domingo',
+const weekDaysNames = [
+  'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
+  'Sexta-feira', 'Sábado', 'Domingo'
 ];
 
 export interface Task {
@@ -35,139 +24,130 @@ export interface Task {
   taskFinalTime: string;
 }
 
-function isHourInRange(hour: string, start: string, end: string): boolean {
-  return hour >= start && hour < end;
+function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36)}`;
 }
 
-// Chave única para o storage
-const STORAGE_KEY = 'routine_tasks';
+function isHourInRange(hour: string, start: string, end: string) {
+  return hour >= start && hour < end;
+}
 
 export default function Table() {
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isDayModalOpen, setIsDayModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedHour, setSelectedHour] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const isFirstRender = useRef(true); // <-- flag para pular primeiro salvamento
 
-  // Carregar tarefas do localStorage - apenas uma vez na montagem
+  // Carregar do localStorage na montagem
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      console.log('🔍 [LOAD] Conteúdo bruto do localStorage:', stored);
-      if (stored) {
+    const stored = localStorage.getItem('user_routine_tasks');
+    if (stored) {
+      try {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setTasks(parsed);
-          console.log('✅ [LOAD] Tarefas carregadas com sucesso:', parsed.length);
-        } else {
-          console.warn('⚠️ [LOAD] Dado não é array, resetando.');
-          localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-        }
-      } else {
-        console.log('📦 [LOAD] Nenhuma tarefa encontrada, inicializando vazio.');
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-      }
-    } catch (err) {
-      console.error('❌ [LOAD] Erro ao ler localStorage:', err);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-    } finally {
-      setIsLoading(false);
+        if (Array.isArray(parsed)) setTasks(parsed);
+      } catch (e) {}
     }
   }, []);
 
-  // Persistir tarefas SEMPRE que o estado tasks mudar
+  // Salvar no localStorage, mas pular a primeira execução
   useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-        console.log('💾 [SAVE] Tarefas salvas:', tasks.length);
-      } catch (err) {
-        console.error('❌ [SAVE] Erro ao gravar no localStorage:', err);
-      }
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [tasks, isLoading]);
+    localStorage.setItem('user_routine_tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
-  // Função manual para testar gravação (opcional)
-  const testSave = () => {
-    const testTask: Task = {
-      id: 'test-id',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      taskName: 'Tarefa teste',
-      taskDescription: 'Teste manual',
-      taskInitialTime: '12:00',
-      taskFinalTime: '13:00',
-    };
-    setTasks(prev => [...prev, testTask]);
-  };
+  // ... o resto do seu componente permanece igual
+  // (as funções openModal, closeModal, handleSaveTask, etc. – copie do seu código atual)
 
-  const weekDates = dayNames.map((_, idx) => addDays(weekStart, idx));
+  // Geração das datas da semana
+  const weekDates = weekDaysNames.map((_, idx) => addDays(weekStart, idx));
 
   const goToPreviousWeek = () => setWeekStart(subDays(weekStart, 7));
   const goToNextWeek = () => setWeekStart(addDays(weekStart, 7));
-  const goToToday = () =>
-    setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const goToToday = () => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
-  function openDayModal(date: string, hour: string, task?: Task) {
+  function loadTemplate() {
+    const storedTemplate = localStorage.getItem('weekly_template');
+    if (!storedTemplate) {
+      alert('Nenhum template salvo.');
+      return;
+    }
+    let template;
+    try { template = JSON.parse(storedTemplate); } catch(e) { return; }
+    if (!window.confirm('Aplicar template na semana atual?')) return;
+
+    const weekStartStr = format(weekStart, 'yyyy-MM-dd');
+    const weekEndStr = format(addDays(weekStart, 6), 'yyyy-MM-dd');
+    const tasksWithoutWeek = tasks.filter(t => t.date < weekStartStr || t.date > weekEndStr);
+    const newTasks: Task[] = [];
+
+    weekDates.forEach((date, idx) => {
+      const dayName = weekDaysNames[idx];
+      const dayTasks = template.filter((t: any) => t.day === dayName);
+      dayTasks.forEach((tmpl: any) => {
+        newTasks.push({
+          id: generateId(),
+          date: format(date, 'yyyy-MM-dd'),
+          taskName: tmpl.taskName,
+          taskDescription: tmpl.taskDescription,
+          taskInitialTime: tmpl.taskInitialTime,
+          taskFinalTime: tmpl.taskFinalTime,
+        });
+      });
+    });
+    setTasks([...tasksWithoutWeek, ...newTasks]);
+    alert(`Template aplicado! ${newTasks.length} tarefas.`);
+  }
+
+  function openModal(date: string, hour: string, task?: Task) {
     setSelectedDate(date);
     setSelectedHour(hour);
     setSelectedTask(task ?? null);
-    setIsDayModalOpen(true);
+    setIsModalOpen(true);
   }
 
-  function closeDayModal() {
-    setIsDayModalOpen(false);
+  function closeModal() {
+    setIsModalOpen(false);
     setSelectedDate(null);
     setSelectedHour(null);
     setSelectedTask(null);
   }
 
   function handleSaveTask(task: Task) {
-    console.log('📝 [SAVE_TASK] Recebida tarefa para salvar:', task);
-    setTasks((prev) => {
-      const exists = prev.some((t) => t.id === task.id);
-      let newTasks;
-      if (exists) {
-        newTasks = prev.map((t) => (t.id === task.id ? task : t));
-        console.log('✏️ Atualizando tarefa existente');
-      } else {
-        newTasks = [...prev, task];
-        console.log('➕ Adicionando nova tarefa');
-      }
-      return newTasks;
+    setTasks(prev => {
+      const exists = prev.some(t => t.id === task.id);
+      return exists ? prev.map(t => t.id === task.id ? task : t) : [...prev, task];
     });
-    closeDayModal();
+    closeModal();
   }
 
   function handleDeleteTask(taskId: string) {
-    if (window.confirm('Excluir esta tarefa permanentemente?')) {
-      console.log('🗑️ [DELETE] Deletando tarefa:', taskId);
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      closeDayModal();
+    if (window.confirm('Excluir tarefa?')) {
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+      closeModal();
     }
   }
 
-  const tasksForSelectedDate = selectedDate
-    ? tasks.filter((t) => t.date === selectedDate)
-    : [];
+  const tasksForSelectedDate = selectedDate ? tasks.filter(t => t.date === selectedDate) : [];
 
-  if (isLoading) {
-    return <div>Carregando agenda...</div>;
-  }
-
+  // Renderização (igual ao que você já tinha, com o botão de template)
   return (
     <>
       <div className="week-navigation">
         <button onClick={goToPreviousWeek}>← Semana anterior</button>
         <button onClick={goToToday}>Hoje</button>
         <button onClick={goToNextWeek}>Próxima semana →</button>
-        <span className="week-range">
-          {format(weekStart, 'dd/MM/yyyy')} -{' '}
-          {format(addDays(weekStart, 6), 'dd/MM/yyyy')}
-        </span>
+        <span className="week-range">{format(weekStart, 'dd/MM/yyyy')} - {format(addDays(weekStart, 6), 'dd/MM/yyyy')}</span>
+        <button className="load-template-btn" onClick={loadTemplate}>📋 Carregar template</button>
       </div>
 
       <div className="table-container">
@@ -175,15 +155,11 @@ export default function Table() {
           <thead>
             <tr>
               <th className="table-header-title">Horário</th>
-              {dayNames.map((dayName, idx) => {
-                const date = weekDates[idx];
+              {weekDates.map((date, idx) => {
                 const isToday = isSameDay(date, new Date());
                 return (
-                  <th
-                    key={dayName}
-                    className={`table-header-day ${isToday ? 'today-header' : ''}`}
-                  >
-                    <div className="day-name">{dayName}</div>
+                  <th key={idx} className={`table-header-day ${isToday ? 'today-header' : ''}`}>
+                    <div className="day-name">{weekDaysNames[idx]}</div>
                     <div className="day-number">{format(date, 'dd/MM')}</div>
                   </th>
                 );
@@ -191,30 +167,24 @@ export default function Table() {
             </tr>
           </thead>
           <tbody>
-            {hours.map((hour) => (
+            {hours.map(hour => (
               <tr key={hour}>
                 <td className="hour-cell">{hour}</td>
-                {weekDates.map((date) => {
+                {weekDates.map(date => {
                   const dateStr = format(date, 'yyyy-MM-dd');
-                  const task = tasks.find(
-                    (t) =>
-                      t.date === dateStr &&
-                      isHourInRange(hour, t.taskInitialTime, t.taskFinalTime)
+                  const task = tasks.find(t =>
+                    t.date === dateStr && isHourInRange(hour, t.taskInitialTime, t.taskFinalTime)
                   );
                   return (
                     <td
                       key={dateStr}
                       className={`day-cell ${task ? 'occupied' : ''}`}
-                      onClick={() => openDayModal(dateStr, hour, task)}
+                      onClick={() => openModal(dateStr, hour, task)}
                     >
                       {task && (
                         <div className="task">
                           <strong>{task.taskName}</strong>
-                          {task.taskDescription && (
-                            <span className="task-description">
-                              {task.taskDescription}
-                            </span>
-                          )}
+                          {task.taskDescription && <span className="task-description">{task.taskDescription}</span>}
                         </div>
                       )}
                     </td>
@@ -226,7 +196,7 @@ export default function Table() {
         </table>
       </div>
 
-      {isDayModalOpen && selectedDate && selectedHour && (
+      {isModalOpen && selectedDate && selectedHour && (
         <DayModal
           date={selectedDate}
           hour={selectedHour}
@@ -234,7 +204,7 @@ export default function Table() {
           existingTasks={tasksForSelectedDate}
           onSaveTask={handleSaveTask}
           onDeleteTask={handleDeleteTask}
-          onClose={closeDayModal}
+          onClose={closeModal}
         />
       )}
     </>
