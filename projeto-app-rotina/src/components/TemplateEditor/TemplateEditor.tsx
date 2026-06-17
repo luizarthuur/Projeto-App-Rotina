@@ -1,6 +1,7 @@
 // src/components/templateEditor/TemplateEditor.tsx
 import { useState, useEffect, useRef } from 'react';
-import './TemplateEditor.css'
+import './TemplateEditor.css';
+import '../modal/modal.css'; // importa o CSS compartilhado
 
 const hours = [
   '07:00','08:00','09:00','10:00','11:00','12:00',
@@ -86,8 +87,14 @@ export default function TemplateEditor() {
   function closeModal() { setModalOpen(false); setEditingTask(null); }
 
   function handleSave() {
-    if (!form.taskName.trim()) return alert('Nome da tarefa é obrigatório');
-    if (form.startTime >= form.endTime) return alert('Horário final deve ser maior que o inicial');
+    if (!form.taskName.trim()) {
+      alert('Nome da tarefa é obrigatório');
+      return;
+    }
+    if (form.startTime >= form.endTime) {
+      alert('Horário final deve ser maior que o inicial');
+      return;
+    }
 
     const newTask: TemplateTask = {
       id: editingTask?.id ?? generateId(),
@@ -113,9 +120,9 @@ export default function TemplateEditor() {
 
   return (
     <div className='templateeditor-container'>
-        <div className='templateeditor-container-title'>
-            <h2>Editor de Template Semanal</h2>
-            <p>Monte sua rotina padrão (as alterações são salvas automaticamente) e carregue-as na tabela.</p>
+      <div className='templateeditor-container-title'>
+        <h2>Editor de Template Semanal</h2>
+        <p>Monte sua rotina padrão (as alterações são salvas automaticamente) e carregue-as na tabela.</p>
       </div>
 
       <div className="table-container">
@@ -161,36 +168,57 @@ export default function TemplateEditor() {
 
       {modalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>{selectedDay} - {selectedHour}</h3>
-            <input
-              type="text"
-              placeholder="Nome da tarefa"
-              value={form.taskName}
-              onChange={e => setForm({...form, taskName: e.target.value})}
-            />
-            <input
-              type="text"
-              placeholder="Descrição (opcional)"
-              value={form.taskDescription}
-              onChange={e => setForm({...form, taskDescription: e.target.value})}
-            />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="time"
-                value={form.startTime}
-                onChange={e => setForm({...form, startTime: e.target.value})}
-              />
-              <input
-                type="time"
-                value={form.endTime}
-                onChange={e => setForm({...form, endTime: e.target.value})}
-              />
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{selectedDay} – {selectedHour}</h2>
             </div>
-            <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-              <button onClick={handleSave}>Salvar</button>
-              {editingTask && <button onClick={() => handleDelete(editingTask.id)}>Excluir</button>}
-              <button onClick={closeModal}>Cancelar</button>
+            <div className="modal-body">
+              {editingTask && (
+                <div className="modal-preview">
+                  <p><strong>{editingTask.taskName}</strong> – {editingTask.taskInitialTime} às {editingTask.taskFinalTime}</p>
+                  {editingTask.taskDescription && <p>{editingTask.taskDescription}</p>}
+                </div>
+              )}
+              <div className="modal-fields">
+                <input
+                  type="text"
+                  placeholder="Nome da tarefa"
+                  value={form.taskName}
+                  onChange={e => setForm({...form, taskName: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Descrição (opcional)"
+                  value={form.taskDescription}
+                  onChange={e => setForm({...form, taskDescription: e.target.value})}
+                />
+                <div className="modal-time-row">
+                  <input
+                    type="time"
+                    value={form.startTime}
+                    onChange={e => setForm({...form, startTime: e.target.value})}
+                  />
+                  <span>até</span>
+                  <input
+                    type="time"
+                    value={form.endTime}
+                    onChange={e => setForm({...form, endTime: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-save" onClick={handleSave}>
+                {editingTask ? 'Salvar' : 'Adicionar'}
+              </button>
+              {editingTask && (
+                <button className="btn-delete" onClick={() => handleDelete(editingTask.id)}>
+                  Excluir
+                </button>
+              )}
+              <button className="btn-cancel" onClick={closeModal}>
+                Cancelar
+              </button>
             </div>
           </div>
         </div>

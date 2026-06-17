@@ -1,7 +1,6 @@
 // src/components/dayModal/DayModal.tsx
-import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
-import './dayModal.css';
+import '../modal/modal.css';
 import type { Task } from '../table/table';
 
 function generateId(): string {
@@ -107,53 +106,65 @@ export default function DayModal({
     weekday: 'long', day: 'numeric', month: 'long'
   });
 
-  return createPortal(
-    <>
-      <div className="modal-overlay" onClick={onClose} />
-      <div className="modal-container">
-        <div className="modal-content">
+  // Estrutura idêntica ao TemplateEditor (sem portal)
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
           <h2>{formattedDate}</h2>
+        </div>
+        <div className="modal-body">
           {task && (
-            <div className="preview">
+            <div className="modal-preview">
               <p><strong>{task.taskName}</strong> – {task.taskInitialTime} às {task.taskFinalTime}</p>
-              <p>{task.taskDescription}</p>
+              {task.taskDescription && <p>{task.taskDescription}</p>}
             </div>
           )}
-          <input
-            name="taskName"
-            placeholder="Nome da tarefa"
-            value={form.taskName}
-            onChange={handleChange}
-          />
-          <input
-            name="taskDescription"
-            placeholder="Descrição (opcional)"
-            value={form.taskDescription}
-            onChange={handleChange}
-          />
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="modal-fields">
             <input
-              type="time"
-              name="taskInitialTime"
-              value={form.taskInitialTime}
+              name="taskName"
+              placeholder="Nome da tarefa"
+              value={form.taskName}
               onChange={handleChange}
             />
             <input
-              type="time"
-              name="taskFinalTime"
-              value={form.taskFinalTime}
+              name="taskDescription"
+              placeholder="Descrição (opcional)"
+              value={form.taskDescription}
               onChange={handleChange}
             />
-          </div>
-          {error && <div className="error-message">{error}</div>}
-          <div className="modal-buttons">
-            <button onClick={handleSave}>{task ? 'Salvar' : 'Adicionar'}</button>
-            {task && onDeleteTask && <button onClick={handleDelete}>Excluir</button>}
-            <button onClick={onClose}>Fechar</button>
+            <div className="modal-time-row">
+              <input
+                type="time"
+                name="taskInitialTime"
+                value={form.taskInitialTime}
+                onChange={handleChange}
+              />
+              <span>até</span>
+              <input
+                type="time"
+                name="taskFinalTime"
+                value={form.taskFinalTime}
+                onChange={handleChange}
+              />
+            </div>
+            {error && <div className="modal-error">{error}</div>}
           </div>
         </div>
+        <div className="modal-footer">
+          <button className="btn-save" onClick={handleSave}>
+            {task ? 'Salvar' : 'Adicionar'}
+          </button>
+          {task && onDeleteTask && (
+            <button className="btn-delete" onClick={handleDelete}>
+              Excluir
+            </button>
+          )}
+          <button className="btn-cancel" onClick={onClose}>
+            Fechar
+          </button>
+        </div>
       </div>
-    </>,
-    document.body
+    </div>
   );
 }
